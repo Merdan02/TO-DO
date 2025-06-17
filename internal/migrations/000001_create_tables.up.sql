@@ -1,18 +1,20 @@
 CREATE TABLE users (
-                       id UUID PRIMARY KEY,
+                       id SERIAL PRIMARY KEY,
                        username TEXT UNIQUE NOT NULL,
-                       email TEXT UNIQUE NOT NULL,
-                       password TEXT NOT NULL,
-                       is_admin BOOLEAN DEFAULT FALSE,
-                       created_at TIMESTAMP DEFAULT now()
+                       password_hash TEXT NOT NULL,
+                       role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'user')),
+                       created_at TIMESTAMP DEFAULT now(),
+                       updated_at TIMESTAMP DEFAULT now()
 );
 
+
 CREATE TABLE tasks (
-                       id UUID PRIMARY KEY,
-                       user_id UUID NOT NULL,
+                       id SERIAL PRIMARY KEY,
+                       user_id INTEGER NOT NULL,
                        title TEXT NOT NULL,
                        description TEXT,
-                       completed BOOLEAN DEFAULT FALSE,
+                       done BOOLEAN DEFAULT FALSE,
                        created_at TIMESTAMP DEFAULT now(),
+                       updated_at TIMESTAMP DEFAULT now(),
                        CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

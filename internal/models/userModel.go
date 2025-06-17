@@ -10,4 +10,5 @@ type UserModel struct {
 	Password  string    `json:"password_hash"`
 	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
