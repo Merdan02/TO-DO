@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"time"
+
 	"todo-app/internal/models"
 	"todo-app/internal/service"
 )
@@ -19,14 +19,6 @@ func NewUserHandler(userService service.UserService) *UserHandler {
 	}
 }
 
-type UserResponse struct {
-	ID       int       `json:"id"`
-	Username string    `json:"username"`
-	Role     string    `json:"role"`
-	Created  time.Time `json:"created"`
-	Updated  time.Time `json:"updated"`
-}
-
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var user models.UserModel
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -39,11 +31,12 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, UserResponse{
+	c.JSON(http.StatusCreated, models.UserResponse{
 		ID:       user.ID,
 		Username: user.Username,
 		Role:     user.Role,
 		Created:  user.CreatedAt,
+		Updated:  user.UpdatedAt,
 	})
 }
 
@@ -81,7 +74,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, UserResponse{
+	c.JSON(http.StatusOK, models.UserResponse{
 		ID:       updatedUser.ID,
 		Username: updatedUser.Username,
 		Role:     updatedUser.Role,
@@ -125,5 +118,19 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusNoContent, UserResponse{})
+	c.JSON(http.StatusNoContent, models.UserResponse{})
+}
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var user models.UserModel
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	token, err := h.service.Login(c.Request.Context(), user.Username, user.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"token:": token})
 }

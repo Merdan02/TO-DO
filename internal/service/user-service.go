@@ -8,6 +8,7 @@ import (
 	"strings"
 	"todo-app/internal/models"
 	"todo-app/internal/repository"
+	"todo-app/internal/utils"
 )
 
 type UserServ struct {
@@ -29,6 +30,7 @@ type UserService interface {
 	GetUserByUsername(ctx context.Context, username string) (*models.UserModel, error)
 	UpdateUser(ctx context.Context, user *models.UserModel) error
 	DeleteUser(ctx context.Context, userID int) error
+	Login(ctx context.Context, username, password string) (string, error)
 }
 
 func (s *UserServ) CreateUser(ctx context.Context, user *models.UserModel) error {
@@ -135,4 +137,24 @@ func (s *UserServ) DeleteUser(ctx context.Context, userID int) error {
 		return errors.New("failed to delete user")
 	}
 	return nil
+}
+
+func (s *UserServ) Login(ctx context.Context, username string, password string) (string, error) {
+	u, err := s.repo.GetUserByUsername(ctx, username)
+	if err != nil {
+		s.Log.Error("username is not found or with wrong name", zap.String("username", username))
+		return "", errors.New("username is not found or with wrong name")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	if err != nil {
+		s.Log.Error("password is wrong", zap.String("password", password))
+		return "", errors.New("password is wrong")
+	}
+	token, err := utils.GenerateJWT(u.ID, username, u.Role)
+	if err != nil {
+		s.Log.Error("generate jwt failed", zap.Error(err))
+		return "", errors.New("generate jwt failed")
+	}
+	return token, err
 }
