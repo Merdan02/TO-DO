@@ -11,11 +11,15 @@ import (
 	"todo-app/internal/service"
 )
 
-func InitApp(db *sql.DB, log *zap.Logger) *handler.UserHandler {
+func InitApp(db *sql.DB, log *zap.Logger) (*handler.UserHandler, *handler.TaskHandler) {
 	userRepo := repository.NewUserRepo(db)
 	userService := service.NewUserServ(userRepo, log)
 	userHandler := handler.NewUserHandler(userService)
-	return userHandler
+
+	taskRepo := repository.NewTaskRepo(db)
+	taskService := service.NewTaskServ(taskRepo, log)
+	taskHandler := handler.NewTaskHandler(taskService)
+	return userHandler, taskHandler
 }
 
 func Run() {
@@ -43,9 +47,9 @@ func Run() {
 		}
 	}(logger)
 
-	userHandler := InitApp(db, logger)
+	userHandler, taskHandler := InitApp(db, logger)
 
-	r := routes.SetupRoutes(userHandler)
+	r := routes.SetupRoutes(userHandler, taskHandler)
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal("failed to run server", zap.Error(err))
 		return

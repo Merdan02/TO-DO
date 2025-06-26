@@ -6,23 +6,28 @@ import (
 	"todo-app/internal/middleware"
 )
 
-func SetupRoutes(handler *handler.UserHandler) *gin.Engine {
+func SetupRoutes(user *handler.UserHandler, task *handler.TaskHandler) *gin.Engine {
 	router := gin.Default()
 
-	router.POST("/Login", handler.Login)
+	router.POST("/Login", user.Login)
 
 	userRouter := router.Group("/users", middleware.Middleware())
 	{
-		userRouter.POST("/", handler.CreateUser)
-		userRouter.GET("/", handler.GetAllUser)
-		userRouter.PUT("/:id", handler.UpdateUser)
-		userRouter.GET("/:id", handler.GetUserByID)
-		userRouter.GET("/name/:name", handler.GetUserByName)
+		userRouter.POST("/", user.CreateUser)
+		userRouter.GET("/", user.GetAllUser)
+		userRouter.PUT("/:id", user.UpdateUser)
+		userRouter.GET("/:id", user.GetUserByID)
+		userRouter.GET("/name/:name", user.GetUserByName)
 	}
 	adminGroup := router.Group("/admin/users", middleware.Middleware(), middleware.AdminOnly())
 	{
-		adminGroup.DELETE("/:id", handler.DeleteUser)
+		adminGroup.DELETE("/:id", user.DeleteUser)
 
+	}
+
+	taskGroup := router.Group("/tasks", middleware.Middleware())
+	{
+		taskGroup.POST("/", task.CreateTask)
 	}
 	return router
 
