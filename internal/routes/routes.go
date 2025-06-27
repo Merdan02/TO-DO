@@ -29,6 +29,9 @@ func SetupRoutes(user *handler.UserHandler, task *handler.TaskHandler) *gin.Engi
 	{
 		taskGroup.POST("/", task.CreateTask)
 		taskGroup.GET("/", task.GetAllTasks)
+		taskGroup.GET("/:id", task.GetByID)
+		taskGroup.PUT("/:id", task.UpdateTask)
+		taskGroup.DELETE(":id", task.DeleteByID)
 	}
 	return router
 
