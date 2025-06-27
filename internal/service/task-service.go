@@ -22,6 +22,7 @@ func NewTaskServ(repo repository.TaskRepository, logger *zap.Logger) TaskService
 
 type TaskService interface {
 	CreateTask(ctx context.Context, task *models.Tasks) error
+	GetAllTasks(ctx context.Context) ([]models.Tasks, error)
 }
 
 func (s *TaskServ) CreateTask(ctx context.Context, task *models.Tasks) error {
@@ -35,4 +36,12 @@ func (s *TaskServ) CreateTask(ctx context.Context, task *models.Tasks) error {
 		return err
 	}
 	return nil
+}
+
+func (s *TaskServ) GetAllTasks(ctx context.Context) ([]models.Tasks, error) {
+	tasks, err := s.repo.GetAllTasks(ctx)
+	if err != nil {
+		s.Log.Error("error getting all tasks", zap.Error(err))
+	}
+	return tasks, err
 }

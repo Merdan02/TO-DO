@@ -28,6 +28,7 @@ func SetupRoutes(user *handler.UserHandler, task *handler.TaskHandler) *gin.Engi
 	taskGroup := router.Group("/tasks", middleware.Middleware())
 	{
 		taskGroup.POST("/", task.CreateTask)
+		taskGroup.GET("/", task.GetAllTasks)
 	}
 	return router
 

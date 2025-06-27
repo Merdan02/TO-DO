@@ -19,6 +19,7 @@ func NewTaskRepo(db *sql.DB) TaskRepository {
 
 type TaskRepository interface {
 	CreateTask(ctx context.Context, task *models.Tasks) error
+	GetAllTasks(ctx context.Context) ([]models.Tasks, error)
 }
 
 func (repo *TaskRepo) CreateTask(ctx context.Context, task *models.Tasks) error {
@@ -30,4 +31,30 @@ func (repo *TaskRepo) CreateTask(ctx context.Context, task *models.Tasks) error 
 	}
 	return nil
 
+}
+
+func (repo *TaskRepo) GetAllTasks(ctx context.Context) ([]models.Tasks, error) {
+	query := "SELECT id, user_id, title, description, done, created_at, updated_at FROM tasks"
+	rows, err := repo.db.QueryContext(ctx, query)
+	if err != nil {
+		log.Println("error getting all tasks: ", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []models.Tasks
+	for rows.Next() {
+		var task models.Tasks
+		err := rows.Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Done, &task.CreatedAt, &task.UpdatedAt)
+		if err != nil {
+			log.Println("error getting all tasks: ", err)
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+	if err := rows.Err(); err != nil {
+		log.Println("error getting all tasks: ", err)
+		return nil, err
+	}
+	return tasks, nil
 }

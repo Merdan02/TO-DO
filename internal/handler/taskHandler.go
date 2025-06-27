@@ -50,3 +50,12 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 		UpdatedAt:   task.UpdatedAt,
 	})
 }
+
+func (h *TaskHandler) GetAllTasks(c *gin.Context) {
+	tasks, err := h.service.GetAllTasks(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"tasks": tasks})
+}
