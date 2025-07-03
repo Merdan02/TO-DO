@@ -10,10 +10,11 @@ func SetupRoutes(user *handler.UserHandler, task *handler.TaskHandler) *gin.Engi
 	router := gin.Default()
 
 	router.POST("/Login", user.Login)
+	router.POST("/Register", user.CreateUser)
 
 	userRouter := router.Group("/users", middleware.Middleware())
 	{
-		userRouter.POST("/", user.CreateUser)
+
 		userRouter.GET("/", user.GetAllUser)
 		userRouter.PUT("/:id", user.UpdateUser)
 		userRouter.GET("/:id", user.GetUserByID)
